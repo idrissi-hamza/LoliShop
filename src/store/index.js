@@ -1,4 +1,10 @@
-import { createStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
+import uiStore from "./ui-store";
 
 
-const store=createStore()
+const store = configureStore({ reducer: { ui:uiStore.reducer } });
+
+
+export default store;
+
+
