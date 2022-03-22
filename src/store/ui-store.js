@@ -1,18 +1,18 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const uiState = {
+const uiStateInit = {
   isShown: false,
 };
 
-const uiStore = createSlice({
-  name: "uiStore",
-  initialState: uiState,
+const uiSlice = createSlice({
+  name: "uiSlice",
+  initialState: uiStateInit,
   reducers: {
     toggle: (state) => {
       state.isShown = !state.isShown;
-      console.log(state);
+      
     },
   },
 });
-export const uiActions = uiStore.actions;
-export default uiStore;
+export const uiActions = uiSlice.actions;
+export default uiSlice;
