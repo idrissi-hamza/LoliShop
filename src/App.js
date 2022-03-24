@@ -3,27 +3,45 @@ import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
 
 import { useEffect, useMemo, useState } from "react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 import Notification from "./components/UI/Notification";
+import { shopActions } from "./store/shop-store";
 let isInitial = true;
 
 function App() {
+  const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.shop.cartItems);
   const totalCart = useSelector((state) => state.shop.totalCart);
+  const refresh = useSelector((state) => state.shop.refresh);
 
   const data = useMemo(() => {
     return { cartItems, totalCart };
   }, [cartItems, totalCart]);
-  const initialNotif = useMemo(() => ({
-    show: false,
-    status: "",
-    title: "",
-    message: "",
-  }),[]);
-  const [notification, setNotification] = useState(initialNotif);
 
+  const initialNotif = useMemo(
+    () => ({
+      show: false,
+      status: "",
+      title: "",
+      message: "",
+    }),
+    []
+  );
+  const [notification, setNotification] = useState(initialNotif);
   useEffect(() => {
+    fetch(process.env.REACT_APP_KEY)
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        dispatch(shopActions.replaceCart(data));
+      });
+  }, [dispatch]);
+  useEffect(() => {
+    if (refresh) {
+      return;
+    }
     const sendCartData = async () => {
       setNotification({
         show: true,
@@ -60,9 +78,10 @@ function App() {
       });
     });
 
-    const timer = setTimeout(() => setNotification(initialNotif), 3000);
+    const timer = setTimeout(() => setNotification(initialNotif), 1000);
     return () => clearTimeout(timer);
-  }, [data, initialNotif]);
+  }, [data, initialNotif, refresh]);
+
   return (
     <>
       {notification.show && (

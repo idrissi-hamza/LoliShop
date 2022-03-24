@@ -17,6 +17,7 @@ const shopStateInit = {
   ],
   cartItems: [],
   totalCart: 0,
+  refresh: true,
   //
 };
 
@@ -24,6 +25,13 @@ const shopSlice = createSlice({
   name: "shopSlice",
   initialState: shopStateInit,
   reducers: {
+    replaceCart: (state, action) => {
+      state.cartItems = action.payload.cartItems;
+      state.totalCart = action.payload.totalCart;
+      state.refresh = false;
+
+    },
+
     addItem: (state, action) => {
       const newItem = action.payload;
 
@@ -41,7 +49,7 @@ const shopSlice = createSlice({
     removeItem: (state, action) => {
       const itemToRemove = state.cartItems.find(
         (item) => item.id === action.payload.id
-      ); 
+      );
 
       if (itemToRemove.quantity === 1) {
         state.cartItems = state.cartItems.filter(
@@ -52,6 +60,7 @@ const shopSlice = createSlice({
         itemToRemove.quantity--;
         state.totalCart--;
       }
+      state.refresh = false;
 
       // state.cartItems.filter(
       //   (item) =>
