@@ -2,30 +2,35 @@ import Cart from "./components/Cart/Cart";
 import Layout from "./components/Layout/Layout";
 import Products from "./components/Shop/Products";
 
-import { useEffect } from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { uiActions } from "./store/ui-store";
+import { useEffect, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 
 import Notification from "./components/UI/Notification";
 let isInitial = true;
 
 function App() {
-  const data = useSelector((state) => state.shop);
-  // const totalCart = useSelector((state) => state.shop.totalCart);
-  // const data = { cartItems, totalCart };
+  const cartItems = useSelector((state) => state.shop.cartItems);
+  const totalCart = useSelector((state) => state.shop.totalCart);
 
-  const dispatch = useDispatch();
-  const notification = useSelector((state) => state.ui.notification);
+  const data = useMemo(() => {
+    return { cartItems, totalCart };
+  }, [cartItems, totalCart]);
+  const initialNotif = useMemo(() => ({
+    show: false,
+    status: "",
+    title: "",
+    message: "",
+  }),[]);
+  const [notification, setNotification] = useState(initialNotif);
 
   useEffect(() => {
     const sendCartData = async () => {
-      dispatch(
-        uiActions.showNotification({
-          status: "pending",
-          title: "sending ...",
-          message: "sending cart data",
-        })
-      );
+      setNotification({
+        show: true,
+        status: "pending",
+        title: "sending ...",
+        message: "sending cart data",
+      });
 
       const res = await fetch(process.env.REACT_APP_KEY, {
         method: "PUT",
@@ -35,32 +40,32 @@ function App() {
       if (!res.ok) {
         throw new Error("error");
       }
-      dispatch(
-        uiActions.showNotification({
-          status: "success",
-          title: "success",
-          message: "send cart data successefully",
-        })
-      );
+      setNotification({
+        show: true,
+        status: "success",
+        title: "success",
+        message: "send cart data successefully",
+      });
     };
-
     if (isInitial) {
       isInitial = false;
       return;
     }
     sendCartData().catch((err) => {
-      dispatch(
-        uiActions.showNotification({
-          status: "error",
-          title: "error",
-          message: "sending  cart data failed",
-        })
-      );
+      setNotification({
+        show: true,
+        status: "error",
+        title: "error",
+        message: "sending  cart data failed",
+      });
     });
-  }, [data, dispatch]);
+
+    const timer = setTimeout(() => setNotification(initialNotif), 3000);
+    return () => clearTimeout(timer);
+  }, [data, initialNotif]);
   return (
     <>
-      {notification && (
+      {notification.show && (
         <Notification
           title={notification.title}
           message={notification.message}
